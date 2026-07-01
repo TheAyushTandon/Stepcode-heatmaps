@@ -18,7 +18,7 @@ export interface LeetCodeData {
   submission_calendar: { [timestamp: string]: number };
 }
 
-export function generateMockGithub(_username: string, year?: number): GithubData {
+export function generateMockGithub(_username: string, year?: number | null): GithubData {
   let calendarStart: Date;
   let totalWeeks = 53;
 
@@ -97,7 +97,7 @@ export function generateMockGithub(_username: string, year?: number): GithubData
   };
 }
 
-export function generateMockLeetcode(username: string, year?: number): LeetCodeData {
+export function generateMockLeetcode(username: string, year?: number | null): LeetCodeData {
   const map: { [timestamp: string]: number } = {};
   
   if (year) {

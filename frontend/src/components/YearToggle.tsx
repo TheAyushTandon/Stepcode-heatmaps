@@ -2,15 +2,15 @@ import React from "react";
 import { motion } from "framer-motion";
 
 interface YearToggleProps {
-  currentYear: number | undefined;
-  onChange: (year: number | undefined) => void;
+  currentYear: number | null;
+  onChange: (year: number | null) => void;
 }
 
 export const YearToggle: React.FC<YearToggleProps> = ({ currentYear, onChange }) => {
   const years = new Date().getFullYear();
   
-  const options: { value: number | undefined; label: string }[] = [
-    { value: undefined, label: "Recent" },
+  const options: { value: number | null; label: string }[] = [
+    { value: null, label: "Recent" },
     { value: years, label: `${years}` },
     { value: years - 1, label: `${years - 1}` },
     { value: years - 2, label: `${years - 2}` },

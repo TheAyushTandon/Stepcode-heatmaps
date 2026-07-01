@@ -27,7 +27,7 @@ const INPUT_LEETCODE_ICON = (
   </svg>
 );
 
-const generateEmptyCalendarForYear = (year?: number): CalendarDay[][] => {
+const generateEmptyCalendarForYear = (year?: number | null): CalendarDay[][] => {
   let calendarStart: Date;
   let totalDays = 371; // 53 weeks default
 
@@ -82,7 +82,7 @@ function App() {
   const [activeLeetcodeUser, setActiveLeetcodeUser] = useState("aarnav63");
 
   const [view, setView] = useState<ViewType>("combined");
-  const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
 
 
@@ -147,7 +147,7 @@ function App() {
     });
   };
 
-  const processLeetcodeData = (data: any, year?: number) => {
+  const processLeetcodeData = (data: any, year?: number | null) => {
     const map = data.submission_calendar || {};
     let totalSubmissions = 0;
     Object.values(map).forEach((v) => (totalSubmissions += Number(v)));
@@ -237,7 +237,7 @@ function App() {
   };
 
   // Main Data Loading Handler
-  const loadData = async (forceUpdateUsers = false, year: number | undefined = selectedYear) => {
+  const loadData = async (forceUpdateUsers = false, year: number | null | undefined = selectedYear) => {
     setLoading(true);
 
     const gh = githubUser.trim() || "TheAyushTandon";
@@ -310,7 +310,7 @@ function App() {
     setLoading(false);
   };
 
-  const handleYearChange = (year: number | undefined) => {
+  const handleYearChange = (year: number | null) => {
     setSelectedYear(year);
     loadData(false, year);
   };

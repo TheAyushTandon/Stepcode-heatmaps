@@ -10,7 +10,125 @@ from pydantic import BaseModel
 
 load_dotenv()
 
+import sqlite3
+from datetime import datetime, timedelta
+
+# Try importing psycopg2 for Postgres support (Render database addon)
+try:
+    import psycopg2
+    HAS_POSTGRES = True
+except ImportError:
+    HAS_POSTGRES = False
+
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+USE_POSTGRES = HAS_POSTGRES and DATABASE_URL.startswith("postgres")
+
+DB_FILE = "cache.db"
+
+def get_db_connection():
+    if USE_POSTGRES:
+        try:
+            return psycopg2.connect(DATABASE_URL)
+        except Exception as e:
+            print(f"Failed to connect to Postgres, falling back to SQLite: {e}")
+    return sqlite3.connect(DB_FILE)
+
+def init_db():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if USE_POSTGRES and DATABASE_URL.startswith("postgres"):
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS activity_cache (
+                username VARCHAR(100),
+                platform VARCHAR(50),
+                year_val INTEGER,
+                data TEXT,
+                last_synced TIMESTAMP,
+                PRIMARY KEY (username, platform, year_val)
+            )
+        """)
+    else:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS activity_cache (
+                username TEXT,
+                platform TEXT,
+                year_val INTEGER,
+                data TEXT,
+                last_synced TIMESTAMP,
+                PRIMARY KEY (username, platform, year_val)
+            )
+        """)
+    conn.commit()
+    conn.close()
+
+def get_cached_data(username: str, platform: str, year: int = None, ttl_hours: int = 24):
+    try:
+        username_clean = username.strip().lower()
+        year_key = year if year is not None else 0
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT data, last_synced FROM activity_cache WHERE username = %s AND platform = %s AND year_val = %s"
+            if USE_POSTGRES else
+            "SELECT data, last_synced FROM activity_cache WHERE username = ? AND platform = ? AND year_val = ?",
+            (username_clean, platform, year_key)
+        )
+        row = cursor.fetchone()
+        conn.close()
+        
+        if row:
+            data_str, last_synced_val = row
+            if isinstance(last_synced_val, str):
+                last_synced = datetime.fromisoformat(last_synced_val)
+            else:
+                last_synced = last_synced_val
+                
+            if last_synced.tzinfo is not None:
+                last_synced = last_synced.replace(tzinfo=None)
+                
+            if datetime.utcnow() - last_synced < timedelta(hours=ttl_hours):
+                return json.loads(data_str)
+    except Exception as e:
+        print(f"Cache read error: {e}")
+    return None
+
+def set_cached_data(username: str, platform: str, year: int, data: dict):
+    try:
+        username_clean = username.strip().lower()
+        year_key = year if year is not None else 0
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        data_str = json.dumps(data)
+        now_str = datetime.utcnow().isoformat()
+        
+        if USE_POSTGRES:
+            cursor.execute(
+                """
+                INSERT INTO activity_cache (username, platform, year_val, data, last_synced)
+                VALUES (%s, %s, %s, %s, %s)
+                ON CONFLICT (username, platform, year_val)
+                DO UPDATE SET data = EXCLUDED.data, last_synced = EXCLUDED.last_synced
+                """,
+                (username_clean, platform, year_key, data_str, datetime.utcnow())
+            )
+        else:
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO activity_cache (username, platform, year_val, data, last_synced)
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (username_clean, platform, year_key, data_str, now_str)
+            )
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Cache write error: {e}")
+
 app = FastAPI()
+
+@app.on_event("startup")
+def startup_event():
+    init_db()
 
 app.add_middleware(
     CORSMiddleware,
@@ -75,6 +193,11 @@ query($username: String!, $from: DateTime, $to: DateTime) {
     response_model=GithubHeatmapResponse
 )
 async def get_github_heatmap(username: str, year: int = None) -> GithubHeatmapResponse:
+    # Check cache first
+    cached = get_cached_data(username, "github", year)
+    if cached:
+        return GithubHeatmapResponse(**cached)
+
     if not TOKEN:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -137,24 +260,26 @@ async def get_github_heatmap(username: str, year: int = None) -> GithubHeatmapRe
         ["contributionCalendar"]
     )
 
-    weeks = [
-        ContributionWeek(
-            contributionDays=[
-                ContributionDay(
-                    date=day["date"],
-                    count=day["contributionCount"],
-                    level=day["contributionLevel"]
-                )
-                for day in week["contributionDays"]
-            ]
-        )
-        for week in calendar["weeks"]
-    ]
+    response_data = {
+        "totalContributions": calendar["totalContributions"],
+        "weeks": [
+            {
+                "contributionDays": [
+                    {
+                        "date": day["date"],
+                        "count": day["contributionCount"],
+                        "level": day["contributionLevel"]
+                    }
+                    for day in week["contributionDays"]
+                ]
+            }
+            for week in calendar["weeks"]
+        ]
+    }
 
-    return GithubHeatmapResponse(
-        totalContributions=calendar["totalContributions"],
-        weeks=weeks
-    )
+    set_cached_data(username, "github", year, response_data)
+
+    return GithubHeatmapResponse(**response_data)
 
 
 @app.get(
@@ -165,6 +290,10 @@ async def get_leetcode_heatmap(
     username: str,
     year: int = None
 ) -> LeetCodeHeatmapResponse:
+    # Check cache first
+    cached = get_cached_data(username, "leetcode", year)
+    if cached:
+        return LeetCodeHeatmapResponse(**cached)
 
     graphql_query = {
         "query": """
@@ -238,7 +367,11 @@ async def get_leetcode_heatmap(
     except (json.JSONDecodeError, TypeError):
         calendar_dict = {}
 
-    return LeetCodeHeatmapResponse(
-        username=username,
-        submission_calendar=calendar_dict
-    )
+    response_data = {
+        "username": username,
+        "submission_calendar": calendar_dict
+    }
+
+    set_cached_data(username, "leetcode", year, response_data)
+
+    return LeetCodeHeatmapResponse(**response_data)

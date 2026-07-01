@@ -11,7 +11,7 @@ interface HeatmapProps {
   type: "github" | "leetcode";
   onHoverCell: (e: React.MouseEvent, text: string, color: string) => void;
   onLeaveCell: () => void;
-  year?: number;
+  year?: number | null;
 }
 
 export const Heatmap: React.FC<HeatmapProps> = ({
