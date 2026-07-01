@@ -619,9 +619,18 @@ input {
   height: 108px;
 }
 
-@keyframes cellFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@keyframes cellWaveEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Cells */
@@ -630,14 +639,15 @@ input {
   height: 12px;
   border-radius: 3.5px;
   cursor: pointer;
-  animation: cellFadeIn 0.1s ease-out forwards;
-  transition: transform 0.06s ease-out, background-color 0.1s ease, outline-color 0.06s ease-out;
+  opacity: 0;
+  animation: cellWaveEntrance 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, outline-color 0.1s ease-out;
 }
 
 .cell:hover {
   position: relative;
   z-index: 10;
-  transform: scale(1.18);
+  transform: scale(1.22) !important;
   outline: 1.5px solid var(--text-primary);
   outline-offset: 1px;
 }

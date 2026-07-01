@@ -126,7 +126,8 @@ function App() {
   const [view, setView] = useState<ViewType>("unified");
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-
+  // Incremented on each successful load to trigger animation replay
+  const [loadCount, setLoadCount] = useState(0);
 
   // Heatmap Calendars
   const [githubWeeks, setGithubWeeks] = useState<CalendarDay[][]>([]);
@@ -350,6 +351,8 @@ function App() {
 
 
     setLoading(false);
+    setLoadCount((c) => c + 1);
+
   };
 
   const handleYearChange = (year: number | null) => {
@@ -533,6 +536,8 @@ function App() {
                       onHoverCell={handleHoverCell}
                       onLeaveCell={handleLeaveCell}
                       year={selectedYear}
+                      direction="ltr"
+                      animKey={loadCount}
                     />
                   )}
                 </GlassPanel>
@@ -596,6 +601,8 @@ function App() {
                       onHoverCell={handleHoverCell}
                       onLeaveCell={handleLeaveCell}
                       year={selectedYear}
+                      direction="ltr"
+                      animKey={loadCount}
                     />
                   )}
                 </GlassPanel>
@@ -659,6 +666,8 @@ function App() {
                       onHoverCell={handleHoverCell}
                       onLeaveCell={handleLeaveCell}
                       year={selectedYear}
+                      direction="rtl"
+                      animKey={loadCount}
                     />
                   )}
                 </GlassPanel>

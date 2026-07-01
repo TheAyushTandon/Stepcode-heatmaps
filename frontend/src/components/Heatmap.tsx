@@ -14,6 +14,10 @@ interface HeatmapProps {
   onHoverCell: (e: React.MouseEvent, text: string, color: string) => void;
   onLeaveCell: () => void;
   year?: number | null;
+  /** Wave direction: ltr = left-to-right (default), rtl = right-to-left */
+  direction?: "ltr" | "rtl";
+  /** Changing this key forces the wave animation to replay */
+  animKey?: string | number;
 }
 
 export const Heatmap: React.FC<HeatmapProps> = ({
@@ -22,6 +26,8 @@ export const Heatmap: React.FC<HeatmapProps> = ({
   onHoverCell,
   onLeaveCell,
   year,
+  direction = "ltr",
+  animKey,
 }) => {
   const colors = type === "github"
     ? [
@@ -130,10 +136,18 @@ export const Heatmap: React.FC<HeatmapProps> = ({
               ))}
             </div>
 
-            {/* Cells Grid */}
-            <div className="cells-grid">
-              {weeks.map((week, colIdx) =>
-                week.map((day, rowIdx) => {
+            {/* Cells Grid — keyed so animation replays on data change */}
+            <div key={animKey} className="cells-grid">
+              {weeks.map((week, colIdx) => {
+                // Wave delay: earlier columns animate first for ltr, later for rtl
+                const totalCols = weeks.length;
+                const waveCol = direction === "rtl"
+                  ? (totalCols - 1 - colIdx)
+                  : colIdx;
+                // 14ms per column step — snappy but visually clear cascade
+                const colDelay = waveCol * 0.014;
+
+                return week.map((day, rowIdx) => {
                   const cellColor = colors[day.level] || colors[0];
                   
                   const dateLabel = day.date
@@ -163,14 +177,15 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                       style={{
                         backgroundColor: cellColor,
                         color: cellColor,
+                        animationDelay: `${colDelay}s`,
                       }}
                       onMouseEnter={(e) => onHoverCell(e, hoverText, activeColor)}
                       onMouseMove={(e) => onHoverCell(e, hoverText, activeColor)}
                       onMouseLeave={onLeaveCell}
                     />
                   );
-                })
-              )}
+                });
+              })}
             </div>
           </div>
         </div>
