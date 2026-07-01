@@ -169,11 +169,24 @@ input {
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
-  padding: 10px 0;
+  padding: 4px 0 6px 0;
 }
 
-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
+.input-with-label {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.input-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  margin-bottom: 0px;
+  line-height: 1;
 }
 
 .btn-generate {

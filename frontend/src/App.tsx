@@ -385,24 +385,34 @@ function App() {
         <div className="controls-wrapper">
           <div className="input-group">
             {INPUT_GITHUB_ICON}
-            <input
-              type="text"
-              placeholder="GitHub Username"
-              value={githubUser}
-              onChange={(e) => setGithubUser(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && loadData(true)}
-            />
+            <div className="input-with-label">
+              <label htmlFor="github-username-input" className="input-label">
+                GitHub USERNAME
+              </label>
+              <input
+                id="github-username-input"
+                type="text"
+                value={githubUser}
+                onChange={(e) => setGithubUser(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && loadData(true)}
+              />
+            </div>
           </div>
           <div className="input-divider" />
           <div className="input-group">
             {INPUT_LEETCODE_ICON}
-            <input
-              type="text"
-              placeholder="LeetCode Username"
-              value={leetcodeUser}
-              onChange={(e) => setLeetcodeUser(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && loadData(true)}
-            />
+            <div className="input-with-label">
+              <label htmlFor="leetcode-username-input" className="input-label">
+                LeetCode USERNAME
+              </label>
+              <input
+                id="leetcode-username-input"
+                type="text"
+                value={leetcodeUser}
+                onChange={(e) => setLeetcodeUser(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && loadData(true)}
+              />
+            </div>
           </div>
           <button
             className={`btn-generate ${loading ? "loading" : ""}`}
