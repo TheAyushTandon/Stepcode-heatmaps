@@ -1,0 +1,27 @@
+# Render Blueprint Specification
+# See https://render.com/docs/blueprints for details
+services:
+  # FastAPI Backend Web Service
+  - type: web
+    name: stepcode-heatmap-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GITHUB_TOKEN
+        sync: false # You will be prompted to enter this during deployment
+      - key: PYTHON_VERSION
+        value: 3.10.12
+
+  # React Frontend Static Site
+  - type: web
+    name: stepcode-heatmap-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    publishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: stepcode-heatmap-backend
+          property: url

@@ -103,7 +103,7 @@ function App() {
     color: "",
   });
 
-  const apiHost = "http://localhost:8000";
+  const apiHost = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
   // Data Normalization Helpers
   const processGithubData = (data: any) => {
