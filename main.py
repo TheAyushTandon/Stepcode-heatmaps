@@ -20,10 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-TOKEN = os.getenv("GITHUB_TOKEN")
+TOKEN = os.getenv("GITHUB_TOKEN", "")
 
 if not TOKEN:
-    raise RuntimeError("GITHUB_TOKEN not found in environment variables.")
+    print("WARNING: GITHUB_TOKEN not found in environment variables. GitHub API calls will return a configuration error.")
 
 GENERIC_ERROR_MESSAGE = "Something went wrong."
 GITHUB_GRAPHQL_URL = "https://api.github.com/graphql"
@@ -52,9 +52,9 @@ class LeetCodeHeatmapResponse(BaseModel):
 
 
 GITHUB_QUERY = """
-query($username: String!) {
+query($username: String!, $from: DateTime, $to: DateTime) {
   user(login: $username) {
-    contributionsCollection {
+    contributionsCollection(from: $from, to: $to) {
       contributionCalendar {
         totalContributions
         weeks {
@@ -74,12 +74,22 @@ query($username: String!) {
     "/api/github/heatmap/{username}",
     response_model=GithubHeatmapResponse
 )
-async def get_github_heatmap(username: str) -> GithubHeatmapResponse:
+async def get_github_heatmap(username: str, year: int = None) -> GithubHeatmapResponse:
+    if not TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GitHub Token is not configured on the backend. Please add GITHUB_TOKEN to your .env file."
+        )
 
     headers = {
         "Authorization": f"Bearer {TOKEN}",
         "User-Agent": "FastAPI-Heatmap"
     }
+
+    variables = {"username": username}
+    if year is not None:
+        variables["from"] = f"{year}-01-01T00:00:00Z"
+        variables["to"] = f"{year}-12-31T23:59:59Z"
 
     async with httpx.AsyncClient() as client:
         try:
@@ -88,7 +98,7 @@ async def get_github_heatmap(username: str) -> GithubHeatmapResponse:
                 headers=headers,
                 json={
                     "query": GITHUB_QUERY,
-                    "variables": {"username": username}
+                    "variables": variables
                 },
                 timeout=10.0
             )
@@ -108,6 +118,7 @@ async def get_github_heatmap(username: str) -> GithubHeatmapResponse:
     data = response.json()
 
     if "errors" in data:
+        print("GitHub API returned errors:", data["errors"])
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=GENERIC_ERROR_MESSAGE
@@ -151,7 +162,8 @@ async def get_github_heatmap(username: str) -> GithubHeatmapResponse:
     response_model=LeetCodeHeatmapResponse
 )
 async def get_leetcode_heatmap(
-    username: str
+    username: str,
+    year: int = None
 ) -> LeetCodeHeatmapResponse:
 
     graphql_query = {
@@ -165,7 +177,8 @@ async def get_leetcode_heatmap(
         }
         """,
         "variables": {
-            "username": username
+            "username": username,
+            "year": year
         }
     }
 
