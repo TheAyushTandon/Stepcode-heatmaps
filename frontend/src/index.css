@@ -633,6 +633,20 @@ input {
   }
 }
 
+@keyframes cellWaveExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.25);
+  }
+}
+
 /* Cells */
 .cell {
   width: 12px;
@@ -640,8 +654,14 @@ input {
   border-radius: 3.5px;
   cursor: pointer;
   opacity: 0;
-  animation: cellWaveEntrance 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: cellWaveEntrance 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
   transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, outline-color 0.1s ease-out;
+}
+
+/* Exit override — cells are already visible, wave them out */
+.cell.exiting {
+  opacity: 1;
+  animation: cellWaveExit 0.25s cubic-bezier(0.7, 0, 0.84, 0) both;
 }
 
 .cell:hover {
