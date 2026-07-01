@@ -8,10 +8,7 @@ import { GlassPanel } from "./components/GlassPanel";
 import { Heatmap, type CalendarDay } from "./components/Heatmap";
 import { Tooltip } from "./components/Tooltip";
 
-import {
-  generateMockGithub,
-  generateMockLeetcode,
-} from "./utils/mockEngine";
+
 
 
 const INPUT_GITHUB_ICON = (
@@ -136,6 +133,9 @@ function App() {
   // Stats Counters
   const [githubStats, setGithubStats] = useState({ total: 0, activeDays: 0, streak: 0 });
   const [leetcodeStats, setLeetcodeStats] = useState({ total: 0, activeDays: 0, streak: 0 });
+
+  // Inline error toast
+  const [error, setError] = useState<string | null>(null);
 
   // Floating Tooltip State
   const [tooltip, setTooltip] = useState({
@@ -281,18 +281,30 @@ function App() {
 
   // Main Data Loading Handler
   const loadData = async (forceUpdateUsers = false, year: number | null | undefined = selectedYear) => {
-    setLoading(true);
-
     const gh = githubUser.trim();
     const lc = leetcodeUser.trim();
+
+    // Validate inputs before hitting the API
+    if (!gh && !lc) {
+      setError("Please enter at least one username to generate a heatmap.");
+      return;
+    }
+    if (!gh) {
+      setError("Please enter your GitHub username.");
+      return;
+    }
+    if (!lc) {
+      setError("Please enter your LeetCode username.");
+      return;
+    }
+
+    setError(null);
+    setLoading(true);
 
     if (forceUpdateUsers) {
       setActiveGithubUser(gh);
       setActiveLeetcodeUser(lc);
     }
-
-    let isGithubDemo = false;
-    let isLeetcodeDemo = false;
 
     const yearParam = year ? `?year=${year}` : "";
 
@@ -302,17 +314,19 @@ function App() {
       if (res.ok) {
         const data = await res.json();
         processGithubData(data);
+      } else if (res.status === 404) {
+        setError(`GitHub user "${gh}" not found. Check the username and try again.`);
+        setGithubWeeks(generateEmptyCalendarForYear(year));
+        setGithubStats({ total: 0, activeDays: 0, streak: 0 });
       } else {
-        if (res.status === 404) {
-          alert(`GitHub user "${gh}" not found.`);
-          setGithubWeeks(generateEmptyCalendarForYear(year));
-          setGithubStats({ total: 0, activeDays: 0, streak: 0 });
-        } else {
-          isGithubDemo = true;
-        }
+        setError("GitHub API error. Please try again in a moment.");
+        setGithubWeeks(generateEmptyCalendarForYear(year));
+        setGithubStats({ total: 0, activeDays: 0, streak: 0 });
       }
-    } catch (err) {
-      isGithubDemo = true;
+    } catch {
+      setError("Could not reach the server. Make sure the backend is running.");
+      setGithubWeeks(generateEmptyCalendarForYear(year));
+      setGithubStats({ total: 0, activeDays: 0, streak: 0 });
     }
 
     // Fetch LeetCode
@@ -326,33 +340,25 @@ function App() {
           setLeetcodeWeeks(generateEmptyCalendarForYear(year));
           setLeetcodeStats({ total: 0, activeDays: 0, streak: 0 });
         }
+      } else if (res.status === 404) {
+        setError((prev) =>
+          prev
+            ? prev + ` Also: LeetCode user "${lc}" not found.`
+            : `LeetCode user "${lc}" not found or profile is private.`
+        );
+        setLeetcodeWeeks(generateEmptyCalendarForYear(year));
+        setLeetcodeStats({ total: 0, activeDays: 0, streak: 0 });
       } else {
-        if (res.status === 404) {
-          alert(`LeetCode user "${lc}" not found or profile is private.`);
-          setLeetcodeWeeks(generateEmptyCalendarForYear(year));
-          setLeetcodeStats({ total: 0, activeDays: 0, streak: 0 });
-        } else {
-          isLeetcodeDemo = true;
-        }
+        setLeetcodeWeeks(generateEmptyCalendarForYear(year));
+        setLeetcodeStats({ total: 0, activeDays: 0, streak: 0 });
       }
-    } catch (err) {
-      isLeetcodeDemo = true;
+    } catch {
+      setLeetcodeWeeks(generateEmptyCalendarForYear(year));
+      setLeetcodeStats({ total: 0, activeDays: 0, streak: 0 });
     }
-
-    // Mock Fallbacks
-    if (isGithubDemo) {
-      const mock = generateMockGithub(gh, year);
-      processGithubData(mock);
-    }
-    if (isLeetcodeDemo) {
-      const mock = generateMockLeetcode(lc, year);
-      processLeetcodeData(mock, year);
-    }
-
 
     setLoading(false);
     setLoadCount((c) => c + 1);
-
   };
 
   const handleYearChange = (year: number | null) => {
@@ -380,6 +386,27 @@ function App() {
     <>
       <div className="container">
         <Header />
+
+        {/* Error Toast */}
+        {error && (
+          <motion.div
+            className="error-toast"
+            initial={{ opacity: 0, y: -12, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ type: "spring", stiffness: 380, damping: 30 }}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style={{ flexShrink: 0 }}>
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+            </svg>
+            <span>{error}</span>
+            <button className="error-toast-dismiss" onClick={() => setError(null)} aria-label="Dismiss error">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+              </svg>
+            </button>
+          </motion.div>
+        )}
 
         {/* Controls */}
         <div className="controls-wrapper">
