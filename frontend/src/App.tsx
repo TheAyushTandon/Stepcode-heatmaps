@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Header } from "./components/Header";
 import { Toggle, type ViewType } from "./components/Toggle";
 import { YearToggle } from "./components/YearToggle";
@@ -392,118 +392,136 @@ function App() {
         <YearToggle currentYear={selectedYear} onChange={handleYearChange} />
 
         {/* Cards Layout */}
-        <div className="cards-wrapper">
-          <AnimatePresence mode="popLayout">
-            {(view === "combined" || view === "github") && (
-              <motion.div
-                key="github-card"
-                className="card-container github-container"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.12, ease: "easeOut" }}
-              >
-                <GlassPanel theme="github" id="github-panel">
-                  <div className="card-header">
-                    <div className="card-title-group">
-                      <span className="card-category">GitHub Activity</span>
-                      <div className="card-main-row">
-                        <h2 className="card-main-val">
-                          {githubStats.total} <span className="card-main-unit">Contributions</span>
-                        </h2>
-                        <div className="card-badges-row">
-                          <span className="badge-stat badge-active">
-                            <span className="badge-dot" style={{ backgroundColor: "var(--gh-green-4)" }} />
-                            {githubStats.activeDays} Days Active
-                          </span>
-                          <span className="badge-stat badge-streak">
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style={{ opacity: 0.85 }}>
-                              <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Streak: {githubStats.streak}d
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="card-header-actions">
-                      <span className="badge-user">@{activeGithubUser}</span>
-                      <button className="btn-action-more" aria-label="More options">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                          <path d="M5 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm14 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-7 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+        <div 
+          className="cards-wrapper"
+          style={{
+            gap: view === "combined" ? "30px" : "0px",
+            transition: "gap 0.4s cubic-bezier(0.16, 1, 0.3, 1)"
+          }}
+        >
+          <motion.div
+            layout
+            key="github-card"
+            className="card-container github-container"
+            style={{
+              flex: view === "combined" || view === "github" ? "1 1 0%" : "0 0 0%",
+              opacity: view === "combined" || view === "github" ? 1 : 0,
+              pointerEvents: view === "combined" || view === "github" ? "auto" : "none",
+              overflow: "hidden",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 280,
+              damping: 28,
+              opacity: { duration: 0.15 }
+            }}
+          >
+            <GlassPanel theme="github" id="github-panel">
+              <div className="card-header">
+                <div className="card-title-group">
+                  <span className="card-category">GitHub Activity</span>
+                  <div className="card-main-row">
+                    <h2 className="card-main-val">
+                      {githubStats.total} <span className="card-main-unit">Contributions</span>
+                    </h2>
+                    <div className="card-badges-row">
+                      <span className="badge-stat badge-active">
+                        <span className="badge-dot" style={{ backgroundColor: "var(--gh-green-4)" }} />
+                        {githubStats.activeDays} Days Active
+                      </span>
+                      <span className="badge-stat badge-streak">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style={{ opacity: 0.85 }}>
+                          <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                      </button>
+                        Streak: {githubStats.streak}d
+                      </span>
                     </div>
                   </div>
+                </div>
+                <div className="card-header-actions">
+                  <span className="badge-user">@{activeGithubUser}</span>
+                  <button className="btn-action-more" aria-label="More options">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                      <path d="M5 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm14 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-7 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
 
-                  {githubWeeks.length > 0 && (
-                    <Heatmap
-                      weeks={githubWeeks}
-                      type="github"
-                      onHoverCell={handleHoverCell}
-                      onLeaveCell={handleLeaveCell}
-                      year={selectedYear}
-                    />
-                  )}
-                </GlassPanel>
-              </motion.div>
-            )}
+              {githubWeeks.length > 0 && (
+                <Heatmap
+                  weeks={githubWeeks}
+                  type="github"
+                  onHoverCell={handleHoverCell}
+                  onLeaveCell={handleLeaveCell}
+                  year={selectedYear}
+                />
+              )}
+            </GlassPanel>
+          </motion.div>
 
-            {(view === "combined" || view === "leetcode") && (
-              <motion.div
-                key="leetcode-card"
-                className="card-container leetcode-container"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.12, ease: "easeOut" }}
-              >
-                <GlassPanel theme="leetcode" id="leetcode-panel">
-                  <div className="card-header">
-                    <div className="card-title-group">
-                      <span className="card-category">LeetCode Activity</span>
-                      <div className="card-main-row">
-                        <h2 className="card-main-val">
-                          {leetcodeStats.total} <span className="card-main-unit">Submissions</span>
-                        </h2>
-                        <div className="card-badges-row">
-                          <span className="badge-stat badge-active">
-                            <span className="badge-dot" style={{ backgroundColor: "var(--lc-orange-4)" }} />
-                            {leetcodeStats.activeDays} Days Active
-                          </span>
-                          <span className="badge-stat badge-streak">
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style={{ opacity: 0.85 }}>
-                              <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                              <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Streak: {leetcodeStats.streak}d
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="card-header-actions">
-                      <span className="badge-user">@{activeLeetcodeUser}</span>
-                      <button className="btn-action-more" aria-label="More options">
-                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                          <path d="M5 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm14 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-7 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+          <motion.div
+            layout
+            key="leetcode-card"
+            className="card-container leetcode-container"
+            style={{
+              flex: view === "combined" || view === "leetcode" ? "1 1 0%" : "0 0 0%",
+              opacity: view === "combined" || view === "leetcode" ? 1 : 0,
+              pointerEvents: view === "combined" || view === "leetcode" ? "auto" : "none",
+              overflow: "hidden",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 280,
+              damping: 28,
+              opacity: { duration: 0.15 }
+            }}
+          >
+            <GlassPanel theme="leetcode" id="leetcode-panel">
+              <div className="card-header">
+                <div className="card-title-group">
+                  <span className="card-category">LeetCode Activity</span>
+                  <div className="card-main-row">
+                    <h2 className="card-main-val">
+                      {leetcodeStats.total} <span className="card-main-unit">Submissions</span>
+                    </h2>
+                    <div className="card-badges-row">
+                      <span className="badge-stat badge-active">
+                        <span className="badge-dot" style={{ backgroundColor: "var(--lc-orange-4)" }} />
+                        {leetcodeStats.activeDays} Days Active
+                      </span>
+                      <span className="badge-stat badge-streak">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" style={{ opacity: 0.85 }}>
+                          <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                      </button>
+                        Streak: {leetcodeStats.streak}d
+                      </span>
                     </div>
                   </div>
+                </div>
+                <div className="card-header-actions">
+                  <span className="badge-user">@{activeLeetcodeUser}</span>
+                  <button className="btn-action-more" aria-label="More options">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                      <path d="M5 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm14 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-7 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
 
-                  {leetcodeWeeks.length > 0 && (
-                    <Heatmap
-                      weeks={leetcodeWeeks}
-                      type="leetcode"
-                      onHoverCell={handleHoverCell}
-                      onLeaveCell={handleLeaveCell}
-                      year={selectedYear}
-                    />
-                  )}
-                </GlassPanel>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              {leetcodeWeeks.length > 0 && (
+                <Heatmap
+                  weeks={leetcodeWeeks}
+                  type="leetcode"
+                  onHoverCell={handleHoverCell}
+                  onLeaveCell={handleLeaveCell}
+                  year={selectedYear}
+                />
+              )}
+            </GlassPanel>
+          </motion.div>
         </div>
 
       </div>
