@@ -4,11 +4,13 @@ export interface CalendarDay {
   date: string;
   count: number;
   level: number; // 0 to 4
+  githubCount?: number;
+  leetcodeCount?: number;
 }
 
 interface HeatmapProps {
   weeks: CalendarDay[][];
-  type: "github" | "leetcode";
+  type: "github" | "leetcode" | "unified";
   onHoverCell: (e: React.MouseEvent, text: string, color: string) => void;
   onLeaveCell: () => void;
   year?: number | null;
@@ -21,9 +23,7 @@ export const Heatmap: React.FC<HeatmapProps> = ({
   onLeaveCell,
   year,
 }) => {
-  const isGithub = type === "github";
-  
-  const colors = isGithub
+  const colors = type === "github"
     ? [
         "var(--gh-green-0)",
         "var(--gh-green-1)",
@@ -31,15 +31,27 @@ export const Heatmap: React.FC<HeatmapProps> = ({
         "var(--gh-green-3)",
         "var(--gh-green-4)",
       ]
-    : [
+    : type === "leetcode"
+    ? [
         "var(--lc-orange-0)",
         "var(--lc-orange-1)",
         "var(--lc-orange-2)",
         "var(--lc-orange-3)",
         "var(--lc-orange-4)",
+      ]
+    : [
+        "var(--sc-red-0)",
+        "var(--sc-red-1)",
+        "var(--sc-red-2)",
+        "var(--sc-red-3)",
+        "var(--sc-red-4)",
       ];
 
-  const activeColor = isGithub ? "var(--gh-green-3)" : "var(--lc-orange-3)";
+  const activeColor = type === "github"
+    ? "var(--gh-green-3)"
+    : type === "leetcode"
+    ? "var(--lc-orange-3)"
+    : "var(--sc-red-3)";
 
   // Parse months for the header
   const getMonthsHeader = () => {
@@ -133,9 +145,16 @@ export const Heatmap: React.FC<HeatmapProps> = ({
                       })
                     : "";
 
-                  const hoverText = `${day.count} ${
-                    isGithub ? "contributions" : "submissions"
-                  } on ${dateLabel}`;
+                  let hoverText = "";
+                  if (type === "unified") {
+                    const ghCount = day.githubCount || 0;
+                    const lcCount = day.leetcodeCount || 0;
+                    hoverText = `${ghCount} commits & ${lcCount} questions solved on ${dateLabel}`;
+                  } else {
+                    hoverText = `${day.count} ${
+                      type === "github" ? "contributions" : "submissions"
+                    } on ${dateLabel}`;
+                  }
 
                   return (
                     <div

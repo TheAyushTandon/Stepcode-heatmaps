@@ -20,6 +20,13 @@
   --lc-orange-2: #704300;
   --lc-orange-3: #b86e00;
   --lc-orange-4: #ffa116;
+  
+  --sc-red-0: #22262B;
+  --sc-red-1: #380006;
+  --sc-red-2: #70000D;
+  --sc-red-3: #B80016;
+  --sc-red-4: #E63946;
+
 
   --font-heading: 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -299,11 +306,6 @@ input::placeholder {
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
-  background: radial-gradient(
-    350px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
-    rgba(230, 50, 50, 0.15),
-    transparent 85%
-  );
   -webkit-mask: 
     linear-gradient(#fff 0 0) content-box, 
     linear-gradient(#fff 0 0);
@@ -313,7 +315,45 @@ input::placeholder {
   z-index: 2;
 }
 
-.glass-panel:hover {
+/* GitHub glow & hover */
+.glass-panel.github-theme::before {
+  background: radial-gradient(
+    350px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(38, 166, 65, 0.15),
+    transparent 85%
+  );
+}
+.glass-panel.github-theme:hover {
+  border-color: rgba(38, 166, 65, 0.25);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* LeetCode glow & hover */
+.glass-panel.leetcode-theme::before {
+  background: radial-gradient(
+    350px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(255, 161, 22, 0.15),
+    transparent 85%
+  );
+}
+.glass-panel.leetcode-theme:hover {
+  border-color: rgba(255, 161, 22, 0.25);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Unified (StepCode Red) glow & hover */
+.glass-panel.unified-theme::before {
+  background: radial-gradient(
+    350px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
+    rgba(230, 50, 50, 0.15),
+    transparent 85%
+  );
+}
+.glass-panel.unified-theme:hover {
   border-color: rgba(230, 50, 50, 0.25);
   box-shadow: 
     0 25px 50px -12px rgba(0, 0, 0, 0.7),

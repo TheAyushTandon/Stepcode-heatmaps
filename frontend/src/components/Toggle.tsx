@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-export type ViewType = "combined" | "github" | "leetcode";
+export type ViewType = "unified" | "combined" | "github" | "leetcode";
 
 interface ToggleProps {
   currentView: ViewType;
@@ -10,9 +10,10 @@ interface ToggleProps {
 
 export const Toggle: React.FC<ToggleProps> = ({ currentView, onChange }) => {
   const options: { value: ViewType; label: string }[] = [
-    { value: "combined", label: "Dashboard" },
-    { value: "github", label: "GitHub Stats" },
-    { value: "leetcode", label: "LeetCode Stats" },
+    { value: "unified", label: "Unified" },
+    { value: "combined", label: "Separate" },
+    { value: "github", label: "GitHub Only" },
+    { value: "leetcode", label: "LeetCode Only" },
   ];
 
   return (

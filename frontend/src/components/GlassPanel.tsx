@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 interface GlassPanelProps {
   children: React.ReactNode;
-  theme?: "github" | "leetcode";
+  theme?: "github" | "leetcode" | "unified";
   id?: string;
   className?: string;
 }
@@ -11,7 +11,7 @@ interface GlassPanelProps {
 export const GlassPanel: React.FC<GlassPanelProps> = ({
   children,
   className = "",
-  theme = "github",
+  theme = "unified",
   id,
 }) => {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -25,11 +25,17 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
     panelRef.current.style.setProperty("--mouse-y", `${y}px`);
   };
 
+  const getThemeClass = () => {
+    if (theme === "github") return "github-theme";
+    if (theme === "leetcode") return "leetcode-theme";
+    return "unified-theme";
+  };
+
   return (
     <motion.div
       ref={panelRef}
       onMouseMove={handleMouseMove}
-      className={`glass-panel ${theme === "github" ? "github-theme" : "leetcode-theme"} ${className}`}
+      className={`glass-panel ${getThemeClass()} ${className}`}
       id={id}
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
