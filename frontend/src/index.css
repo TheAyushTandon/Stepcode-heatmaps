@@ -791,153 +791,254 @@ input {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
 }
 
-/* Responsive */
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+
+/* ── 1024px: stack cards vertically ── */
 @media (max-width: 1024px) {
   .cards-wrapper {
     flex-direction: column;
-    gap: 30px;
+    gap: 24px !important; /* override inline style on combined view */
+  }
+
+  .card-container {
+    flex: 1 1 100% !important; /* override inline flex values */
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  /* In "separate" view, show BOTH cards stacked */
+  .card-container.github-container,
+  .card-container.leetcode-container,
+  .card-container.unified-container {
+    overflow: visible !important;
   }
 }
 
+/* ── 768px: main mobile breakpoint ── */
 @media (max-width: 768px) {
-  .logo-main, .logo-sub, .logo-slash {
-    font-size: 28px;
+  /* Container */
+  .container {
+    padding: 28px 16px 40px;
   }
-  
+
+  /* Header */
+  header {
+    margin-bottom: 36px;
+  }
+  .logo-main, .logo-sub, .logo-slash {
+    font-size: 26px;
+  }
+  header p {
+    font-size: 14px;
+    max-width: 340px;
+  }
+
+  /* Controls */
   .controls-wrapper {
     flex-direction: column;
-    border-radius: 24px;
-    padding: 16px;
+    border-radius: 20px;
+    padding: 14px;
     align-items: stretch;
-    gap: 12px;
+    gap: 0;
+    margin: 24px auto 32px;
   }
-
-  .controls-wrapper .input-group:first-of-type {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    padding-bottom: 8px;
+  .controls-wrapper .input-group {
+    padding: 8px 0;
   }
-
+  .controls-wrapper .input-group:not(:last-of-type) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
   .input-divider {
     display: none;
   }
-
   .btn-generate {
     justify-content: center;
-    margin-top: 6px;
+    width: 100%;
+    margin-top: 12px;
+    border-radius: 10px;
+    padding: 13px 20px;
   }
 
+  /* View toggle — scroll horizontally if needed */
+  .toggle-wrapper {
+    margin-bottom: 28px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start;
+    padding: 0 2px;
+  }
+  .toggle-wrapper::-webkit-scrollbar { display: none; }
+  .toggle-container {
+    flex-shrink: 0;
+  }
+  .toggle-btn {
+    padding: 9px 16px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  /* Year toggle */
+  .year-toggle-wrapper {
+    margin-bottom: 28px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start;
+    padding: 0 2px;
+  }
+  .year-toggle-wrapper::-webkit-scrollbar { display: none; }
+  .year-toggle-container {
+    flex-shrink: 0;
+  }
+  .year-toggle-btn {
+    padding: 7px 13px;
+    font-size: 11.5px;
+    white-space: nowrap;
+  }
+
+  /* Cards */
   .glass-panel {
     padding: 20px 16px;
-    border-radius: 20px;
+    border-radius: 18px;
   }
-
   .card-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 18px;
   }
-  
+  .card-main-row {
+    gap: 10px;
+  }
+  .card-main-val {
+    font-size: 26px;
+  }
+  .card-main-unit {
+    font-size: 14px;
+  }
   .card-header-actions {
     width: 100%;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding-top: 10px;
   }
-
+  /* Unified card shows two usernames — truncate gracefully */
   .badge-user {
-    align-self: center;
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
+  /* Heatmap cells — slightly smaller */
   .cells-grid {
     grid-template-rows: repeat(7, 10px);
     grid-auto-columns: 10px;
     gap: 3px;
     height: 88px;
   }
-  
   .cell {
     width: 10px;
     height: 10px;
-    border-radius: 2px;
+    border-radius: 2.5px;
   }
-  
   .days-column {
     grid-template-rows: repeat(7, 10px);
     gap: 3px;
     height: 88px;
   }
-  
   .days-column span {
     height: 10px;
     line-height: 10px;
   }
-  
   .months-header {
     grid-auto-columns: 10px;
     gap: 3px;
   }
 
+  /* Stats strip */
   .stats-strip {
     padding: 10px 12px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
-
-  .stats-divider {
-    height: 18px;
-  }
-
+  .stats-divider { height: 18px; }
   .stat-label {
     font-size: 8px;
     letter-spacing: 0.5px;
     margin-bottom: 2px;
   }
-
-  .stat-value {
-    font-size: 18px;
-  }
-  
-  .container {
-    padding: 30px 16px;
-  }
-
-  .toggle-wrapper {
-    margin-bottom: 25px;
-  }
-
-  .toggle-btn {
-    padding: 8px 16px;
-    font-size: 12.5px;
-  }
-
-  .year-toggle-wrapper {
-    margin-bottom: 30px;
-  }
-
-  .year-toggle-btn {
-    padding: 6px 12px;
-    font-size: 11.5px;
-  }
+  .stat-value { font-size: 18px; }
 }
 
+/* ── 480px: compact phones ── */
 @media (max-width: 480px) {
-  .logo-main, .logo-sub, .logo-slash {
-    font-size: 22px;
+  .container {
+    padding: 22px 12px 32px;
   }
-
+  .logo-main, .logo-sub, .logo-slash {
+    font-size: 20px;
+  }
+  header p {
+    font-size: 13px;
+  }
   .toggle-btn {
-    padding: 7px 10px;
+    padding: 8px 12px;
+    font-size: 11.5px;
+  }
+  .year-toggle-btn {
+    padding: 6px 10px;
     font-size: 11px;
   }
-
-  .year-toggle-btn {
-    padding: 5px 8px;
-    font-size: 10px;
+  .card-main-val {
+    font-size: 22px;
   }
-  
-  .card-title-text h2 {
-    font-size: 18px;
+  .card-main-unit {
+    font-size: 13px;
+  }
+  .badge-stat {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  .glass-panel {
+    padding: 16px 13px;
+    border-radius: 16px;
+  }
+
+  /* Heatmap cells — smallest */
+  .cells-grid {
+    grid-template-rows: repeat(7, 9px);
+    grid-auto-columns: 9px;
+    gap: 2.5px;
+    height: 80px;
+  }
+  .cell {
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+  }
+  .days-column {
+    grid-template-rows: repeat(7, 9px);
+    gap: 2.5px;
+    height: 80px;
+  }
+  .days-column span {
+    height: 9px;
+    line-height: 9px;
+  }
+  .months-header {
+    grid-auto-columns: 9px;
+    gap: 2.5px;
+  }
+  .legend-cell {
+    width: 9px !important;
+    height: 9px !important;
+  }
+  .heatmap-year-label {
+    font-size: 10px;
   }
 }
 
