@@ -13,17 +13,6 @@ import {
   generateMockLeetcode,
 } from "./utils/mockEngine";
 
-const GITHUB_ICON = (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.577.688.479C19.138 20.164 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
-  </svg>
-);
-
-const LEETCODE_ICON = (
-  <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-    <path d="M16.102 17.93l-2.697 2.607c-.466.467-1.111.662-1.744.53a1.593 1.593 0 01-1.007-.63L5.052 14.88a1.56 1.56 0 010-2.203l7.247-7.25c.304-.302.72-.43 1.137-.34a1.56 1.56 0 011.022.68l2.69 2.61c.467.466.662 1.112.53 1.745a1.593 1.593 0 01-.63 1.007l-7.247 7.25c-.304.302-.72.43-1.137.34a1.56 1.56 0 01-1.022-.68L5.008 15.65c-.467-.466-.662-1.112-.53-1.745a1.593 1.593 0 01.63-1.007l7.247-7.25c.304-.302.72-.43 1.137-.34a1.56 1.56 0 011.022.68l.588.588-7.248 7.25a1.56 1.56 0 000 2.203l.587.587a1.56 1.56 0 002.203 0l7.247-7.25.588.588a1.56 1.56 0 010 2.203zM22 12c0-5.523-4.477-10-10-10S2 6.477 2 12s4.477 10 10 10 10-4.477 10-10zM13.483 3.5a1.37 1.37 0 00-.961.414l-6.85 6.85a1.37 1.37 0 000 1.937l3.228 3.228c.26.26.607.393.96.393.327 0 .654-.124.906-.356l6.905-6.905a1.37 1.37 0 000-1.937l-3.228-3.228a1.375 1.375 0 00-.96-.414z" />
-  </svg>
-);
 
 const INPUT_GITHUB_ICON = (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -95,9 +84,6 @@ function App() {
   const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(false);
 
-  // Connection State
-  const [connStatus, setConnStatus] = useState<ConnectionStatus>("loading");
-  const [connText, setConnText] = useState("Checking API Server Connection...");
 
   // Heatmap Calendars
   const [githubWeeks, setGithubWeeks] = useState<CalendarDay[][]>([]);
@@ -263,7 +249,6 @@ function App() {
 
     let isGithubDemo = false;
     let isLeetcodeDemo = false;
-    let isOffline = false;
 
     const yearParam = year ? `?year=${year}` : "";
 
@@ -284,7 +269,6 @@ function App() {
       }
     } catch (err) {
       isGithubDemo = true;
-      isOffline = true;
     }
 
     // Fetch LeetCode
@@ -309,7 +293,6 @@ function App() {
       }
     } catch (err) {
       isLeetcodeDemo = true;
-      isOffline = true;
     }
 
     // Mock Fallbacks
@@ -322,20 +305,6 @@ function App() {
       processLeetcodeData(mock, year);
     }
 
-    // Connection diagnostics text updates
-    if (!isGithubDemo && !isLeetcodeDemo) {
-      setConnStatus("live");
-      setConnText("Live Sync Active (FastAPI Connected)");
-    } else if (isOffline) {
-      setConnStatus("demo");
-      setConnText("Offline Demo Mode (Backend not running, using mock engine)");
-    } else if (isGithubDemo) {
-      setConnStatus("warning");
-      setConnText("Demo Mode: GITHUB_TOKEN missing on backend, using mock engine for GitHub");
-    } else {
-      setConnStatus("warning");
-      setConnText("Demo Mode: LeetCode profile private or error, using mock engine");
-    }
 
     setLoading(false);
   };
