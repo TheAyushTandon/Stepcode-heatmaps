@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Header } from "./components/Header";
 import { Toggle, type ViewType } from "./components/Toggle";
@@ -118,10 +118,10 @@ const getUnifiedWeeks = (ghWeeks: CalendarDay[][], lcWeeks: CalendarDay[][]): Ca
 };
 
 function App() {
-  const [githubUser, setGithubUser] = useState("TheAyushTandon");
-  const [leetcodeUser, setLeetcodeUser] = useState("aarnav63");
-  const [activeGithubUser, setActiveGithubUser] = useState("TheAyushTandon");
-  const [activeLeetcodeUser, setActiveLeetcodeUser] = useState("aarnav63");
+  const [githubUser, setGithubUser] = useState("");
+  const [leetcodeUser, setLeetcodeUser] = useState("");
+  const [activeGithubUser, setActiveGithubUser] = useState("");
+  const [activeLeetcodeUser, setActiveLeetcodeUser] = useState("");
 
   const [view, setView] = useState<ViewType>("unified");
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
@@ -283,8 +283,8 @@ function App() {
   const loadData = async (forceUpdateUsers = false, year: number | null | undefined = selectedYear) => {
     setLoading(true);
 
-    const gh = githubUser.trim() || "TheAyushTandon";
-    const lc = leetcodeUser.trim() || "aarnav63";
+    const gh = githubUser.trim();
+    const lc = leetcodeUser.trim();
 
     if (forceUpdateUsers) {
       setActiveGithubUser(gh);
@@ -360,10 +360,7 @@ function App() {
     loadData(false, year);
   };
 
-  // Initial Load on mount
-  useEffect(() => {
-    loadData(true);
-  }, []);
+  // No auto-load on mount — user must enter usernames and click Generate
 
   const handleHoverCell = (e: React.MouseEvent, text: string, color: string) => {
     setTooltip({
